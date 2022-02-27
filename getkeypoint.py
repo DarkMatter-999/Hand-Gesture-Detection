@@ -65,7 +65,7 @@ with mp_hands.Hands(
                     read = not read
                     print(read)
                 
-                if 48 <= key <= 57:
+                if ord('0') <= key <= ord('9') or ord('A') <= key <= ord('Z'):
                     number = key - 48
                     print(number, read)
                     if read:
