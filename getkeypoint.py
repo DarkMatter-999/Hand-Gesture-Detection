@@ -1,3 +1,4 @@
+import argparse
 import csv
 import cv2
 import itertools
@@ -7,6 +8,10 @@ import time
 
 from utils import *
 
+parser = argparse.ArgumentParser()
+parser.add_argument("--device", type=int, default=0)
+args = parser.parse_args()
+
 mp_drawing = mp.solutions.drawing_utils
 mp_drawing_styles = mp.solutions.drawing_styles
 mp_hands = mp.solutions.hands
@@ -14,8 +19,10 @@ mp_hands = mp.solutions.hands
 prev_frame_time = 0
 new_frame_time = 0
 
+read = False
+
 # For webcam input:
-cap = cv2.VideoCapture(1)
+cap = cv2.VideoCapture(args.device)
 with mp_hands.Hands(
         max_num_hands=1,
         model_complexity=0,
@@ -23,7 +30,6 @@ with mp_hands.Hands(
         min_tracking_confidence=0.5) as hands:
     while cap.isOpened():
         key = cv2.waitKey(10)
-        read = False
         success, image = cap.read()
         if not success:
             print("Ignoring empty camera frame.")
@@ -57,9 +63,13 @@ with mp_hands.Hands(
                 
                 if key == ord("t"):
                     read = not read
+                    print(read)
                 
-                if read:
-                    logging_csv(3, pre_processed_landmark_list)
+                if 48 <= key <= 57:
+                    number = key - 48
+                    print(number, read)
+                    if read:
+                        logging_csv(number, pre_processed_landmark_list)
 
         new_frame_time = time.time()
 

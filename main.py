@@ -92,7 +92,7 @@ def main():
                     pre_processed_landmark_list = pre_process_landmark(landmark_list)
                     confidence, hand_sign_id = keypoint_classifier(pre_processed_landmark_list)
 
-                    if(confidence > 0.50):
+                    if(confidence > 0.75):
                         info_text = keypoint_classifier_labels[hand_sign_id-1]
                     else:
                         info_text = None
