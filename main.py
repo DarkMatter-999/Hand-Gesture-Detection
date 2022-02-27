@@ -2,6 +2,10 @@ import cv2
 import mediapipe as mp
 import time
 
+from utils import *
+
+from model.keypoint_classifier import KeyPointClassifier
+
 def main():
     mp_drawing = mp.solutions.drawing_utils
     mp_drawing_styles = mp.solutions.drawing_styles
@@ -12,6 +16,15 @@ def main():
 
     # For webcam input:
     cap = cv2.VideoCapture(1)
+    
+    keypoint_classifier = KeyPointClassifier()
+    with open('model/keypoint_classifier_label.csv',
+            encoding='utf-8-sig') as f:
+        keypoint_classifier_labels = csv.reader(f)
+        keypoint_classifier_labels = [
+            row[0] for row in keypoint_classifier_labels
+        ]
+
     with mp_hands.Hands(
             max_num_hands=1,
             model_complexity=0,
@@ -41,6 +54,14 @@ def main():
                             mp_hands.HAND_CONNECTIONS,
                             mp_drawing_styles.get_default_hand_landmarks_style(),
                             mp_drawing_styles.get_default_hand_connections_style())
+                    
+                    landmark_list = calc_landmark_list(image, hand_landmarks)
+
+                    pre_processed_landmark_list = pre_process_landmark(landmark_list)
+                    confidence, hand_sign_id = keypoint_classifier(pre_processed_landmark_list)
+
+                    if(confidence > 0.50):
+                        print(keypoint_classifier_labels[hand_sign_id-1])
 
             new_frame_time = time.time()
 
