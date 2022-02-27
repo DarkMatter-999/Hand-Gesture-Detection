@@ -1,10 +1,37 @@
 import cv2
 import mediapipe as mp
+import numpy as np
 import time
 
 from utils import *
 
 from model.keypoint_classifier import KeyPointClassifier
+
+def draw_info(image, landmarks, info_text):
+    image_width, image_height = image.shape[1], image.shape[0]
+
+    landmark_array = np.empty((0, 2), int)
+
+    for _, landmark in enumerate(landmarks.landmark):
+        landmark_x = min(int(landmark.x * image_width), image_width - 1)
+        landmark_y = min(int(landmark.y * image_height), image_height - 1)
+
+        landmark_point = [np.array((landmark_x, landmark_y))]
+
+        landmark_array = np.append(landmark_array, landmark_point, axis=0)
+
+    x, y, w, h = cv2.boundingRect(landmark_array)
+
+    cv2.rectangle(image, (x, y), (x + w, y + h), (255, 255, 255), 2)
+    
+    if info_text:
+        image = cv2.flip(image, 1)
+        cv2.putText(image, info_text, (image.shape[1] - x  - w+ 5, y - 4),
+            cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 1, cv2.LINE_AA)
+
+        image = cv2.flip(image, 1)
+        
+    return image
 
 def main():
     mp_drawing = mp.solutions.drawing_utils
@@ -61,7 +88,10 @@ def main():
                     confidence, hand_sign_id = keypoint_classifier(pre_processed_landmark_list)
 
                     if(confidence > 0.50):
-                        print(keypoint_classifier_labels[hand_sign_id-1])
+                        info_text = keypoint_classifier_labels[hand_sign_id-1]
+                    else:
+                        info_text = None
+                    image = draw_info(image, hand_landmarks, info_text)
 
             new_frame_time = time.time()
 
