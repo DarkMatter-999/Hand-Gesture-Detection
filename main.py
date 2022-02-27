@@ -1,3 +1,4 @@
+import argparse
 import cv2
 import mediapipe as mp
 import numpy as np
@@ -26,7 +27,7 @@ def draw_info(image, landmarks, info_text):
     
     if info_text:
         image = cv2.flip(image, 1)
-        cv2.putText(image, info_text, (image.shape[1] - x  - w+ 5, y - 4),
+        cv2.putText(image, info_text, (image.shape[1] - x  - w + 5, y - 4),
             cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 1, cv2.LINE_AA)
 
         image = cv2.flip(image, 1)
@@ -34,6 +35,10 @@ def draw_info(image, landmarks, info_text):
     return image
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--device", type=int, default=0)
+    args = parser.parse_args()
+
     mp_drawing = mp.solutions.drawing_utils
     mp_drawing_styles = mp.solutions.drawing_styles
     mp_hands = mp.solutions.hands
@@ -42,7 +47,7 @@ def main():
     new_frame_time = 0
 
     # For webcam input:
-    cap = cv2.VideoCapture(1)
+    cap = cv2.VideoCapture(args.device)
     
     keypoint_classifier = KeyPointClassifier()
     with open('model/keypoint_classifier_label.csv',

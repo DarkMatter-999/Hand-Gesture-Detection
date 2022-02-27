@@ -1,4 +1,5 @@
 import csv
+import matplotlib.pyplot as plt
 import numpy as np
 import tensorflow as tf
 
@@ -38,10 +39,10 @@ model.compile(
     metrics=['accuracy']
 )
 # change epoch to 800-1000
-model.fit(
+history = model.fit(
     x_train,
     y_train,
-    epochs=200,
+    epochs=1000,
     batch_size=128,
     validation_data=(x_test, y_test),
     callbacks=[cp_callback, es_callback]
@@ -76,3 +77,14 @@ interpreter.invoke()
 tflite_results = interpreter.get_tensor(output_details[0]['index'])
 print(np.squeeze(tflite_results))
 print(np.argmax(np.squeeze(tflite_results)))
+
+loss_train = history.history['loss']
+loss_val = history.history['val_loss']
+epochs = range(0, len(loss_train))
+plt.plot(epochs, loss_train, 'g', label='Training loss')
+plt.plot(epochs, loss_val, 'b', label='Validation loss')
+plt.title('Training and Validation loss')
+plt.xlabel('Epochs')
+plt.ylabel('Loss')
+plt.legend()
+plt.show()
